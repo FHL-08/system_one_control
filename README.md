@@ -92,9 +92,15 @@ board streams `RPM <float>` every 100 ms. Set `ENCODER_PPR` to your encoder.
 
 ## Technical notes
 
-**Simulated step response** (1500 RPM setpoint, first-order plant
-$\dot\omega = (u\,\omega_{\max} - \omega)/\tau$, $\tau=0.8$ s): settles by
-~5 s and holds within roughly ±3% with a mild limit cycle.
+**Simulated step response.** The plant model is a first-order lag relating
+duty cycle $u \in [0,1]$ to shaft speed $\omega$:
+
+$$\tau\,\dot\omega + \omega = K\,u, \qquad
+G(s) = \frac{\Omega(s)}{U(s)} = \frac{K}{\tau s + 1}$$
+
+with $K = \omega_{\max} = 2000$ RPM and $\tau = 0.8$ s. For the 1500 RPM
+setpoint the loop settles in ~5 s and holds within roughly ±3% with a mild
+limit cycle.
 
 **Limitations:**
 
