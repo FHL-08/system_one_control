@@ -67,11 +67,11 @@ requirements.txt              Python deps (needs Python ≥ 3.12)
 uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -r requirements.txt
 
-# simulated plant
-.venv/bin/python controller/fuzzy_controller.py --simulate --target 1500
+# simulated plant (DC gain ≈ 1140 RPM at full duty — keep targets below ~1000)
+.venv/bin/python controller/fuzzy_controller.py --simulate --target 800
 
 # real plant (flash arduino/motor_firmware.ino first)
-.venv/bin/python controller/fuzzy_controller.py --port /dev/ttyUSB0 --target 1500
+.venv/bin/python controller/fuzzy_controller.py --port /dev/ttyUSB0 --target 800
 ```
 
 First run downloads ~1.5 GB of weights from Hugging Face (set `HF_TOKEN` for
@@ -92,15 +92,14 @@ board streams `RPM <float>` every 100 ms. Set `ENCODER_PPR` to your encoder.
 
 ## Technical notes
 
-**Simulated step response.** The plant model is a first-order lag relating
-duty cycle $u \in [0,1]$ to shaft speed $\omega$:
+**Simulated step response.** The simulator uses the identified discrete-time
+plant, duty $u \in [0,1]$ mapped onto the 0–5 V input:
 
-$$\tau\,\dot\omega + \omega = K\,u, \qquad
-G(s) = \frac{\Omega(s)}{U(s)} = \frac{K}{\tau s + 1}$$
+$$G(z) = \frac{\Omega(z)}{V(z)} = \frac{172}{z - 0.2462}, \qquad T_s = 0.2\text{ s}$$
 
-with $K = \omega_{\max} = 2000$ RPM and $\tau = 0.8$ s. For the 1500 RPM
-setpoint the loop settles in ~5 s and holds within roughly ±3% with a mild
-limit cycle.
+i.e. $\omega[k+1] = 0.2462\,\omega[k] + 172\,v[k]$, with DC gain
+$\approx 228$ RPM/V ($\approx 1140$ RPM at 5 V). For an 800 RPM setpoint the
+loop settles in ~4 s and holds within roughly ±5% with a mild limit cycle.
 
 **Limitations:**
 
