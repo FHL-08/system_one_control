@@ -90,13 +90,13 @@ Defaults in `motor_firmware.ino` — edit to match your setup:
 Serial protocol at 115200 baud: host sends `D<0-255>` (duty) or `S` (stop);
 board streams `RPM <float>` every 100 ms. Set `ENCODER_PPR` to your encoder.
 
-## What a control theorist should know
+## Technical notes
 
 **Simulated step response** (1500 RPM setpoint, first-order plant
 $\dot\omega = (u\,\omega_{\max} - \omega)/\tau$, $\tau=0.8$ s): settles by
 ~5 s and holds within roughly ±3% with a mild limit cycle.
 
-**The honest caveats:**
+**Limitations:**
 
 - **The membership map is not analytic.** Grades are a learned lookup over
   serialized text, so there are no continuity/monotonicity guarantees and no
