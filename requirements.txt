@@ -1,0 +1,3 @@
+# Python >= 3.12 required by von-sdk
+von-sdk @ git+https://github.com/wfzyx/von.git
+pyserial>=3.5
