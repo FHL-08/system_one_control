@@ -121,7 +121,7 @@ tops out around 56 RPM at full duty; the reference is 40 RPM.
   dangerous direction, and can be engineered deliberately via wording.
 - **Rate limits.** Control updates are gated by `von.cadence_s`
   (0.1 s → 10 Hz) in `shared/controller_params.json`; inference itself is
-  ~40 ms/batch on CPU. Supervisory-rate, not inner-loop servo control.
+  ~40 ms/batch on CPU.
 - **Keep hard guardrails.** Out-of-distribution states return garbage grades;
   clamp duty and keep a hardware e-stop.
 

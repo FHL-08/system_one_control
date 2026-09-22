@@ -4,7 +4,7 @@ Same loop as motor_von_hw.slx:
     plant and controller constants come from controller_params.json
     (via von_control.PARAMS) — single source of truth with the hardware
     model. Controller output is duty fraction [0,1]; volts = volts_per_duty
-    * duty. Sensor noise enters only the feedback path.
+    * duty. Sensor noise enters the feedback path.
     PI: 1-DOF, P on error, forward-Euler I, clamping anti-windup
     Von: von_control.tick at the JSON cadence (hardware gate)
 
