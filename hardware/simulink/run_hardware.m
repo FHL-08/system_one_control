@@ -1,11 +1,17 @@
 function out = run_hardware(stopTime)
 %RUN_HARDWARE Run motor_von_hw.slx in Connected IO mode on the Uno.
 %   Model runs host-side in real time (pacing on); PWM/Encoder blocks
-%   talk to the board over serial. CtrlSelect: in1 = Von, in2 = PI.
+%   talk to the board over serial. CtrlSelect is a ManualSwitch:
+%   sw '1' = top input (Von), sw '0' = bottom input (PI).
+%
+%   Logs rpm_meas, duty_von (fraction), u_pid (counts), mu_von, and the
+%   applied duty in counts. Saves hw_von.mat / hw_pi.mat + matching .png
+%   next to this file, overwriting each run.
 
 if nargin < 1, stopTime = 30; end
+here = fileparts(mfilename('fullpath'));
 
-venv_py = fullfile(fileparts(mfilename('fullpath')), '..', '..', '.venv', 'bin', 'python');
+venv_py = fullfile(here, '..', '..', '.venv', 'bin', 'python');
 pe = pyenv;
 if pe.Status == "NotLoaded"
     pyenv('Version', venv_py, 'ExecutionMode', 'OutOfProcess');
@@ -24,9 +30,7 @@ hCS = getActiveConfigSet(mdl);
 codertarget.data.setIOBlocksMode(hCS, 'connected');
 configset.internal.setParam(hCS, 'ConnectedIO', 'on', 'Apply', 'off');
 
-% CtrlSelect (ManualSwitch): sw='0' -> in1 = Von, sw='1' -> in2 = PI.
-% Read before and after so a mid-run toggle is caught
-sw0 = str2double(get_param([mdl '/CtrlSelect'], 'sw'));
+sw0 = get_param([mdl '/CtrlSelect'], 'sw');
 
 fprintf('Running Connected IO for %g s (first run uploads IO server)...\n', stopTime);
 tic;
@@ -34,22 +38,26 @@ simOut = sim(mdl);
 fprintf('Wall time: %.1f s\n', toc);
 configset.internal.setParam(hCS, 'ConnectedIO', 'off', 'Apply', 'off');
 
-sw = str2double(get_param([mdl '/CtrlSelect'], 'sw'));
-if sw ~= sw0
-    warning('CtrlSelect changed during the run (%d -> %d); naming by final state.', sw0, sw);
+sw = get_param([mdl '/CtrlSelect'], 'sw');
+if ~strcmp(sw, sw0)
+    warning('CtrlSelect changed during the run (%s -> %s); naming by final state.', sw0, sw);
 end
-ctrl = 'von'; if sw == 1, ctrl = 'pi'; end
+ctrl = 'pi'; if strcmp(sw, '1'), ctrl = 'von'; end
 
-out.ctrl = ctrl;
+out.ctrl     = ctrl;
 out.rpm      = simOut.get('rpm_meas');
-out.duty_von = simOut.get('duty_von');   % fraction [0-1]
-out.u_pid    = simOut.get('u_pid');      % counts [0-255], taps after PIDToPWM
-out.u_pid.Data = out.u_pid.Data / 255;   % -> fraction, match duty_von units
-out.mu       = simOut.get('mu_von');
-out.duty     = out.duty_von;   % duty that actually drove the motor
-if sw == 1, out.duty = out.u_pid; end
+out.duty_von = simOut.get('duty_von');   % Von command, fraction [0-1]
+out.u_pid    = simOut.get('u_pid');      % PI command, counts [0-255]
+out.mu       = simOut.get('mu_von');     % Von membership grades
 
-base = sprintf('hw_%s', ctrl);
+% duty that drove the motor, in PWM counts for both paths
+out.duty = out.u_pid;
+if strcmp(ctrl, 'von')
+    out.duty = out.duty_von;
+    out.duty.Data = out.duty.Data * 255;
+end
+
+base = fullfile(here, sprintf('hw_%s', ctrl));
 save([base '.mat'], '-struct', 'out');
 fprintf('Saved %s.mat\n', base);
 
@@ -60,7 +68,7 @@ plot(out.rpm.Time, squeeze(out.rpm.Data), 'b-');
 yline(ref, 'k--', sprintf('%g RPM', ref));
 ylabel('Speed [RPM]'); title(sprintf('Measured motor speed (%s)', ctrl));
 subplot(2,1,2); hold on; grid on;
-plot(out.duty.Time, squeeze(out.duty.Data)*255, 'r-');
+plot(out.duty.Time, squeeze(out.duty.Data), 'r-');
 xlabel('Time [s]'); ylabel('PWM duty [0-255]');
 exportgraphics(f, [base '.png'], 'Resolution', 150);
 end
