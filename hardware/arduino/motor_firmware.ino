@@ -10,7 +10,8 @@
  *   PWM_PIN  = 5   -> motor driver PWM/ENA input (e.g. L298N ENA, ESC signal)
  *   ENC_A    = 2   -> encoder channel A (interrupt)
  *   ENC_B    = 3   -> encoder channel B (interrupt; optional but recommended)
- *   ENCODER_PPR    = pulses per revolution of your encoder
+ *   ENCODER_PPR    = 3576 -> output-shaft counts/rev for the LGM12-N20
+ *                    (encoder CPR x gear ratio x 4 edges)
  *
  * If you have a single-signal tach/hall sensor instead of a quadrature
  * encoder, set SINGLE_CHANNEL_TACH to true and leave ENC_B unconnected.
