@@ -49,9 +49,7 @@ out.mu       = simOut.get('mu_von');
 out.duty     = out.duty_von;   % duty that actually drove the motor
 if sw == 1, out.duty = out.u_pid; end
 
-k = 1;
-while isfile(sprintf('hw_%s%d.mat', ctrl, k)), k = k + 1; end
-base = sprintf('hw_%s%d', ctrl, k);
+base = sprintf('hw_%s', ctrl);
 save([base '.mat'], '-struct', 'out');
 fprintf('Saved %s.mat\n', base);
 

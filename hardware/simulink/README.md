@@ -25,7 +25,7 @@ serial; `von_fuzzy.m` calls `../../shared/von_control.py` through `pyenv`.
 | `encoder_rpm.m` | Encoder count to RPM using wall-clock dt |
 | `von_fuzzy.m` | MATLAB shim around `von_control.tick` |
 | `setup.m` | One-time per session: venv interpreter, Connected IO mode, Von warmup |
-| `run_hardware.m` | Timed closed-loop run; detects the CtrlSelect position and saves `hw_von<N>.mat`/`.png` or `hw_pi<N>.mat`/`.png` |
+| `run_hardware.m` | Timed closed-loop run; detects the CtrlSelect position and saves `hw_von.mat`/`.png` or `hw_pi.mat`/`.png` (overwritten each run) |
 
 ## Run
 
@@ -33,7 +33,7 @@ From this folder in MATLAB:
 
 ```matlab
 >> setup                  % once per MATLAB session
->> out = run_hardware(30);  % 30 s run -> hw_von1.mat / hw_pi1.mat (auto-numbered per controller)
+>> out = run_hardware(30);  % 30 s run -> hw_von.mat or hw_pi.mat (+ .png), per CtrlSelect
 ```
 
 To re-identify the plant or retune the PI:
