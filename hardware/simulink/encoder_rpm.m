@@ -16,7 +16,7 @@ end
 dt = toc(tprev);
 rpm = last;
 if dt >= 0.05
-    rpm = -(60/3576) * (c - cprev) / dt;
+    rpm = max(0, -(60/3576) * (c - cprev) / dt);
     cprev = c; tprev = tic; last = rpm;
 end
 end
