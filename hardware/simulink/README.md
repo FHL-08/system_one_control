@@ -47,10 +47,12 @@ To re-identify the plant or retune the PI:
 ## Example results
 
 Measured on the LGM12-N20, 40 RPM reference, 30 s Connected IO runs.
-Von settles slower but holds tighter; PI rises faster but carries more
-duty jitter (note also the membership-grades panel: `on_target`
-dominates once the speed parks at setpoint).
+PI reaches setpoint faster; Von climbs more slowly but holds it with
+less duty jitter.
 
-| Von | PI |
-|-----|----|
-| ![Von hardware run](hw_von.png) | ![PI hardware run](hw_pi.png) |
+![Von vs PI hardware run](hw_compare.png)
+
+Von membership grades during the Von run — `on_target` dominates once
+the speed parks at setpoint:
+
+![Von membership grades](hw_grades.png)
