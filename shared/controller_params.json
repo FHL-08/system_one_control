@@ -16,6 +16,7 @@
   },
   "von": {
     "cadence_s": 0.1,
+    "ff_margin": 0.05,
     "db_rpm": 2,
     "ki_leak": 0.001,
     "err_fs": 36,
