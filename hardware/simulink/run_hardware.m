@@ -27,26 +27,44 @@ hCS = getActiveConfigSet(mdl);
 codertarget.data.setIOBlocksMode(hCS, 'connected');
 configset.internal.setParam(hCS, 'ConnectedIO', 'on', 'Apply', 'off');
 
+% CtrlSelect (ManualSwitch): in1 = Von, in2 = PI — read before and after
+% so a mid-run toggle is caught
+sw0 = str2double(get_param([mdl '/CtrlSelect'], 'sw'));
+
 fprintf('Running Connected IO for %g s (first run uploads IO server)...\n', stopTime);
 tic;
 simOut = sim(mdl);
 fprintf('Wall time: %.1f s\n', toc);
 configset.internal.setParam(hCS, 'ConnectedIO', 'off', 'Apply', 'off');
 
-out.rpm  = simOut.get('rpm_meas');
-out.duty = simOut.get('duty_von');
-out.mu   = simOut.get('mu_von');
-out.u    = simOut.get('u_pid');
-save('hardware_result.mat', '-struct', 'out');
+sw = str2double(get_param([mdl '/CtrlSelect'], 'sw'));
+if sw ~= sw0
+    warning('CtrlSelect changed during the run (%d -> %d); naming by final state.', sw0, sw);
+end
+ctrl = 'von'; if sw == 2, ctrl = 'pi'; end
+
+out.ctrl = ctrl;
+out.rpm      = simOut.get('rpm_meas');
+out.duty_von = simOut.get('duty_von');
+out.u_pid    = simOut.get('u_pid');
+out.mu       = simOut.get('mu_von');
+out.duty     = out.duty_von;   % duty that actually drove the motor
+if sw == 2, out.duty = out.u_pid; end
+
+k = 1;
+while isfile(sprintf('hw_%s%d.mat', ctrl, k)), k = k + 1; end
+base = sprintf('hw_%s%d', ctrl, k);
+save([base '.mat'], '-struct', 'out');
+fprintf('Saved %s.mat\n', base);
 
 ref = str2double(get_param([mdl '/Ref'], 'Value'));
-f = figure('Name', 'Hardware run - motor_von_hw');
+f = figure('Name', sprintf('Hardware run - %s', ctrl));
 subplot(2,1,1); hold on; grid on;
 plot(out.rpm.Time, squeeze(out.rpm.Data), 'b-');
 yline(ref, 'k--', sprintf('%g RPM', ref));
-ylabel('Speed [RPM]'); title('Measured motor speed');
+ylabel('Speed [RPM]'); title(sprintf('Measured motor speed (%s)', ctrl));
 subplot(2,1,2); hold on; grid on;
 plot(out.duty.Time, squeeze(out.duty.Data)*255, 'r-');
 xlabel('Time [s]'); ylabel('PWM duty [0-255]');
-exportgraphics(f, 'hardware_run.png', 'Resolution', 150);
+exportgraphics(f, [base '.png'], 'Resolution', 150);
 end
