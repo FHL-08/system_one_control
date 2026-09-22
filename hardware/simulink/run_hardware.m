@@ -9,9 +9,6 @@ venv_py = fullfile(fileparts(mfilename('fullpath')), '..', '..', '.venv', 'bin',
 pe = pyenv;
 if pe.Status == "NotLoaded"
     pyenv('Version', venv_py, 'ExecutionMode', 'OutOfProcess');
-elseif pe.Executable ~= venv_py
-    error(['Python already loaded (%s). Restart MATLAB and rerun so the ' ...
-           'venv interpreter can be selected.'], pe.Executable);
 end
 
 mdl = 'motor_von_hw';
@@ -27,8 +24,8 @@ hCS = getActiveConfigSet(mdl);
 codertarget.data.setIOBlocksMode(hCS, 'connected');
 configset.internal.setParam(hCS, 'ConnectedIO', 'on', 'Apply', 'off');
 
-% CtrlSelect (ManualSwitch): in1 = Von, in2 = PI — read before and after
-% so a mid-run toggle is caught
+% CtrlSelect (ManualSwitch): sw='0' -> in1 = Von, sw='1' -> in2 = PI.
+% Read before and after so a mid-run toggle is caught
 sw0 = str2double(get_param([mdl '/CtrlSelect'], 'sw'));
 
 fprintf('Running Connected IO for %g s (first run uploads IO server)...\n', stopTime);
@@ -41,15 +38,16 @@ sw = str2double(get_param([mdl '/CtrlSelect'], 'sw'));
 if sw ~= sw0
     warning('CtrlSelect changed during the run (%d -> %d); naming by final state.', sw0, sw);
 end
-ctrl = 'von'; if sw == 2, ctrl = 'pi'; end
+ctrl = 'von'; if sw == 1, ctrl = 'pi'; end
 
 out.ctrl = ctrl;
 out.rpm      = simOut.get('rpm_meas');
-out.duty_von = simOut.get('duty_von');
-out.u_pid    = simOut.get('u_pid');
+out.duty_von = simOut.get('duty_von');   % fraction [0-1]
+out.u_pid    = simOut.get('u_pid');      % counts [0-255], taps after PIDToPWM
+out.u_pid.Data = out.u_pid.Data / 255;   % -> fraction, match duty_von units
 out.mu       = simOut.get('mu_von');
 out.duty     = out.duty_von;   % duty that actually drove the motor
-if sw == 2, out.duty = out.u_pid; end
+if sw == 1, out.duty = out.u_pid; end
 
 k = 1;
 while isfile(sprintf('hw_%s%d.mat', ctrl, k)), k = k + 1; end
