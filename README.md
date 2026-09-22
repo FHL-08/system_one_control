@@ -46,7 +46,7 @@ normalization — all constants in `shared/controller_params.json`.
 
 | term            | antecedent (paraphrased)          | $c_i$  |
 |-----------------|-----------------------------------|--------|
-| far_under       | far below target ($\text{rpm} < 0.7\,\text{target}$) | $+0.25$ |
+| far_under       | far below target ($\text{rpm} < 0.7 \cdot \text{target}$) | $+0.25$ |
 | under           | clearly below target              | $+0.03$ |
 | slightly_under  | slightly below target             | $+0.002$ |
 | near_under      | barely below target               | $+0.001$ |
@@ -54,7 +54,7 @@ normalization — all constants in `shared/controller_params.json`.
 | near_over       | barely above target               | $-0.01$ |
 | slightly_over   | slightly above target             | $-0.04$ |
 | over            | clearly above target              | $-0.15$ |
-| far_over        | far above target ($\text{rpm} > 1.4\,\text{target}$) | $-0.2$ |
+| far_over        | far above target ($\text{rpm} > 1.4 \cdot \text{target}$) | $-0.2$ |
 
 ## Repository layout
 
