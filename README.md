@@ -140,6 +140,10 @@ Built on [Von](https://github.com/wfzyx/von), an open-source non-autoregressive
 by [@wfzyx](https://github.com/wfzyx). Model weights on Hugging Face:
 [wfzyx/von-1.0](https://huggingface.co/wfzyx/von-1.0).
 
+Hardware built on the [ACE-Lab](https://www.ace-lab.co.uk/) rigs —
+ACE-Lab (Base + Sense) for the microcontroller and measurement side, with
+ACE-Lab (Actuate) providing the LGM12-N20 geared motor and driver.
+
 ## License
 
 MIT
