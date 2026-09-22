@@ -48,8 +48,8 @@ normalization — all constants in `shared/controller_params.json`.
 | term            | antecedent                        | $c_i$  |
 |-----------------|-----------------------------------|--------|
 | far_under       | speed $< 70\%$ of target          | $+0.25$ |
-| under           | below target by 10–30%            | $+0.03$ |
-| slightly_under  | below target by 3–10%             | $+0.002$ |
+| under           | below target by 10–30%            | $+0.10$ |
+| slightly_under  | below target by 3–10%             | $+0.02$ |
 | near_under      | below target by $< 3\%$           | $+0.001$ |
 | on_target       | at target                         | $0$    |
 | near_over       | above target by $< 3\%$           | $-0.01$ |
