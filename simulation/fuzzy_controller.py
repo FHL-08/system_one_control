@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'shared'))
 import von_control
 
-TICK_S = 0.5   # loop period; Von inference on CPU takes ~0.5-1 s anyway
+TICK_S = 0.1   # loop period, matches von.cadence_s; inference is ~40 ms
 TERMS = ['far_under', 'under', 'slightly_under', 'near_under', 'on_target',
          'near_over', 'slightly_over', 'over', 'far_over']
 

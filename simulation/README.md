@@ -20,7 +20,8 @@ uv pip install --python .venv/bin/python -r requirements.txt
 ```
 
 The first Von call downloads ~1.5 GB of weights from Hugging Face (set
-`HF_TOKEN` for higher rate limits). CPU inference is ~0.5–1 s per tick.
+`HF_TOKEN` for higher rate limits). Inference is ~40 ms per tick on a
+desktop CPU; updates are gated by `von.cadence_s` (10 Hz).
 
 ## Run
 

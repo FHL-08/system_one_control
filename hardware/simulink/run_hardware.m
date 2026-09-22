@@ -18,7 +18,7 @@ mdl = 'motor_von_hw';
 load_system(mdl);
 set_param(mdl, 'StopTime', num2str(stopTime));
 
-% warm von_fuzzy so the ~9 s model load doesn't stall a paced tick
+% warm von_fuzzy so the ~5 s model load doesn't stall a paced tick
 fprintf('Warming Von backend...\n');
 params = load_params();
 von_fuzzy(0, params.ref_rpm, 0, 0);

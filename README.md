@@ -82,7 +82,8 @@ uv pip install --python .venv/bin/python -r requirements.txt
 ```
 
 First Von call downloads ~1.5 GB of weights from Hugging Face (set `HF_TOKEN`
-for higher rate limits). CPU inference is ~0.5–1 s per control tick.
+for higher rate limits). Inference is ~40 ms per control tick on a desktop
+CPU — all 9 antecedents in a single forward pass.
 
 ## What to run
 
@@ -118,8 +119,9 @@ tops out around 56 RPM at full duty; the reference is 40 RPM.
   The result is an asymmetric gain surface — brakes harder than it
   accelerates — which is *desirable* when overshoot/overcurrent is the
   dangerous direction, and can be engineered deliberately via wording.
-- **Rate limits.** ~1 Hz control loop on CPU. Suitable for supervisory
-  loops, not inner-loop servo control.
+- **Rate limits.** Control updates are gated by `von.cadence_s`
+  (0.1 s → 10 Hz) in `shared/controller_params.json`; inference itself is
+  ~40 ms/batch on CPU. Supervisory-rate, not inner-loop servo control.
 - **Keep hard guardrails.** Out-of-distribution states return garbage grades;
   clamp duty and keep a hardware e-stop.
 
