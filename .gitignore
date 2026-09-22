@@ -15,6 +15,8 @@ sccprj/
 *.png
 *.mat
 !hardware/simulink/motor_data.mat
+!hardware/simulink/hw_von.png
+!hardware/simulink/hw_pi.png
 
 # Secrets / local environment
 .env

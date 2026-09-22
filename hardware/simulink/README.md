@@ -43,3 +43,14 @@ To re-identify the plant or retune the PI:
 >> optimal_motor_identification
 >> design_pid
 ```
+
+## Example results
+
+Measured on the LGM12-N20, 40 RPM reference, 30 s Connected IO runs.
+Von settles slower but holds tighter; PI rises faster but carries more
+duty jitter (note also the membership-grades panel: `on_target`
+dominates once the speed parks at setpoint).
+
+| Von | PI |
+|-----|----|
+| ![Von hardware run](hw_von.png) | ![PI hardware run](hw_pi.png) |
