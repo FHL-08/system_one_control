@@ -49,9 +49,6 @@ u \leftarrow \Pi_{[0,1]}\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
 The implementation adds an error-magnitude throttle (scales the delta by
 $|e|/e_{fs}$), a deadband with a small integral leak, and cadence
 normalization — all constants in `shared/controller_params.json`.
-While $e < 0$ a feedforward estimate of the steady-state duty,
-$u_{ff} = r(1-a)/(b\cdot V_{duty})$, floors the command and the fuzzy
-correction may exceed it by at most `ff_margin`.
 
 ### Rule base
 

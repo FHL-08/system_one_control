@@ -15,9 +15,6 @@ from pathlib import Path
 
 PARAMS = json.loads(
     (Path(__file__).parent / 'controller_params.json').read_text())
-_PLANT = PARAMS['plant']
-_VPD = PARAMS['volts_per_duty']
-
 _noul = None
 _e_prev = 0.0
 _t_last = None
@@ -78,13 +75,5 @@ def tick(rpm, target, duty_prev, t):
     # 0.15 s; scale so the effective rate is cadence-independent
     delta *= v['cadence_s'] / 0.15
 
-    duty = min(1.0, max(0.0, duty_prev + delta))
-    if err < 0:
-        # feedforward: steady-state duty for the target (rpm_ss =
-        # b*volts/(1-a)) floors the command, and the correction may
-        # exceed it by at most ff_margin so the integrator cannot run
-        # away while the plant lag catches up
-        ff = min(1.0, target * (1 - _PLANT['a']) / (_PLANT['b'] * _VPD))
-        duty = min(ff + v['ff_margin'], max(ff, duty))
     _mu_last = mu
-    return duty, mu, True
+    return min(1.0, max(0.0, duty_prev + delta)), mu, True
