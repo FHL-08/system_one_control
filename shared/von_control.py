@@ -56,8 +56,8 @@ def tick(rpm, target, duty_prev, t):
     trend = 'increasing' if err > _e_prev else 'decreasing'
     _e_prev = err
     state = (f'DC motor speed telemetry: target={target:.0f} RPM, '
-             f'measured={rpm:.0f} RPM, error={err:+.0f} RPM, '
-             f'error is {trend}.')
+             f'measured={rpm:.0f} RPM ({100 * rpm / target:.0f}% of target), '
+             f'error={err:+.0f} RPM, error is {trend}.')
 
     mu = [float(g) for g in _noul(state, v['antecedents'])]
     den = sum(mu)

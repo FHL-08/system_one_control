@@ -31,15 +31,15 @@
       -0.2
     ],
     "antecedents": [
-      "Is the motor speed far below the target, less than roughly 70% of it?",
-      "Is the motor speed clearly below the target but not far below?",
-      "Is the motor speed slightly below the target?",
-      "Is the motor speed just barely below the target, within a few percent?",
-      "Is the motor speed approximately at the target?",
-      "Is the motor speed just barely above the target, within a few percent?",
-      "Is the motor speed slightly above the target?",
-      "Is the motor speed clearly above the target but not far above?",
-      "Is the motor speed far above the target, more than roughly 140% of it?"
+      "Is the motor speed less than 70% of the target?",
+      "Is the motor speed below the target by 10% to 30%?",
+      "Is the motor speed below the target by 3% to 10%?",
+      "Is the motor speed below the target by less than 3%?",
+      "Is the motor speed at the target?",
+      "Is the motor speed above the target by less than 3%?",
+      "Is the motor speed above the target by 3% to 10%?",
+      "Is the motor speed above the target by 10% to 40%?",
+      "Is the motor speed more than 140% of the target?"
     ]
   }
 }

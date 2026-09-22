@@ -30,7 +30,8 @@ rather than tuned per-plant.
 ## Control law
 
 Each tick the controller serializes telemetry into text,
-$x = (\text{target},\ \text{rpm},\ e,\ \dot e\ \text{sign})$, and evaluates all
+$x = (\text{target},\ \text{rpm},\ \text{rpm/target},\ e,\ \dot e\ \text{sign})$,
+and evaluates all
 $N$ antecedents in a single model forward pass. Rule consequents are
 singletons $c_i$ (Sugeno order-0), defuzzified by weighted average and
 integrated onto the duty cycle:
@@ -44,17 +45,17 @@ normalization — all constants in `shared/controller_params.json`.
 
 ### Rule base
 
-| term            | antecedent (paraphrased)          | $c_i$  |
+| term            | antecedent                        | $c_i$  |
 |-----------------|-----------------------------------|--------|
-| far_under       | far below target ($\text{rpm} < 0.7 \cdot \text{target}$) | $+0.25$ |
-| under           | clearly below target              | $+0.03$ |
-| slightly_under  | slightly below target             | $+0.002$ |
-| near_under      | barely below target               | $+0.001$ |
-| on_target       | approximately at target           | $0$    |
-| near_over       | barely above target               | $-0.01$ |
-| slightly_over   | slightly above target             | $-0.04$ |
-| over            | clearly above target              | $-0.15$ |
-| far_over        | far above target ($\text{rpm} > 1.4 \cdot \text{target}$) | $-0.2$ |
+| far_under       | speed $< 70\%$ of target          | $+0.25$ |
+| under           | below target by 10–30%            | $+0.03$ |
+| slightly_under  | below target by 3–10%             | $+0.002$ |
+| near_under      | below target by $< 3\%$           | $+0.001$ |
+| on_target       | at target                         | $0$    |
+| near_over       | above target by $< 3\%$           | $-0.01$ |
+| slightly_over   | above target by 3–10%             | $-0.04$ |
+| over            | above target by 10–40%            | $-0.15$ |
+| far_over        | speed $> 140\%$ of target         | $-0.2$ |
 
 ## Repository layout
 
