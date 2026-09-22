@@ -4,9 +4,9 @@ function out = run_hardware(stopTime)
 %   talk to the board over serial. CtrlSelect is a ManualSwitch:
 %   sw '1' = top input (Von), sw '0' = bottom input (PI).
 %
-%   Logs rpm_meas, duty_von (fraction), u_pid (counts), mu_von, and the
+%   Logs rpm_meas, duty_von (fraction), u_pid (fraction), mu_von, and the
 %   applied duty in counts. Saves hw_von.mat / hw_pi.mat + matching .png
-%   next to this file, overwriting each run.
+%   next to this file.
 
 if nargin < 1, stopTime = 30; end
 here = fileparts(mfilename('fullpath'));
@@ -47,15 +47,15 @@ ctrl = 'pi'; if strcmp(sw, '1'), ctrl = 'von'; end
 out.ctrl     = ctrl;
 out.rpm      = simOut.get('rpm_meas');
 out.duty_von = simOut.get('duty_von');   % Von command, fraction [0-1]
-out.u_pid    = simOut.get('u_pid');      % PI command, counts [0-255]
+out.u_pid    = simOut.get('u_pid');      % PI command, fraction [0-1]
 out.mu       = simOut.get('mu_von');     % Von membership grades
 
 % duty that drove the motor, in PWM counts for both paths
 out.duty = out.u_pid;
 if strcmp(ctrl, 'von')
     out.duty = out.duty_von;
-    out.duty.Data = out.duty.Data * 255;
 end
+out.duty.Data = out.duty.Data * 255;
 
 base = fullfile(here, sprintf('hw_%s', ctrl));
 save([base '.mat'], '-struct', 'out');
@@ -63,12 +63,22 @@ fprintf('Saved %s.mat\n', base);
 
 ref = str2double(get_param([mdl '/Ref'], 'Value'));
 f = figure('Name', sprintf('Hardware run - %s', ctrl));
-subplot(2,1,1); hold on; grid on;
+f.Position(4) = 750;
+subplot(3,1,1); hold on; grid on;
 plot(out.rpm.Time, squeeze(out.rpm.Data), 'b-');
 yline(ref, 'k--', sprintf('%g RPM', ref));
 ylabel('Speed [RPM]'); title(sprintf('Measured motor speed (%s)', ctrl));
-subplot(2,1,2); hold on; grid on;
+subplot(3,1,2); hold on; grid on;
 plot(out.duty.Time, squeeze(out.duty.Data), 'r-');
-xlabel('Time [s]'); ylabel('PWM duty [0-255]');
+ylabel('PWM duty [0-255]');
+subplot(3,1,3); hold on; grid on;
+mu = squeeze(out.mu.Data);
+if isvector(mu), mu = mu(:).'; end
+stairs(out.mu.Time, mu.');
+terms = {'far\_under','under','slightly\_under','near\_under','on\_target', ...
+         'near\_over','slightly\_over','over','far\_over'};
+legend(terms(1:size(mu,1)), 'Location', 'eastoutside');
+xlabel('Time [s]'); ylabel('\mu_i'); ylim([0 1]);
+title('Von membership grades');
 exportgraphics(f, [base '.png'], 'Resolution', 150);
 end
