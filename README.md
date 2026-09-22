@@ -36,7 +36,7 @@ singletons $c_i$ (Sugeno order-0), defuzzified by weighted average and
 integrated onto the duty cycle:
 
 $$\mu_i = \text{Noul}\bigl(x,\ q_i\bigr), \qquad
-u \leftarrow \Pi_{[0,1]}\!\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
+u \leftarrow \Pi_{[0,1]}\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
 
 The implementation adds an error-magnitude throttle (scales the delta by
 $|e|/e_{fs}$), a deadband with a small integral leak, and cadence
