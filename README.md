@@ -1,5 +1,12 @@
 # von-fuzzy-motor
 
+[![Von](https://img.shields.io/badge/Von-wfzyx%2Fvon-FF6F00?logo=github&logoColor=white)](https://github.com/wfzyx/von)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-wfzyx%2Fvon--1.0-blue)](https://huggingface.co/wfzyx/von-1.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](requirements.txt)
+[![Arduino](https://img.shields.io/badge/Arduino-Uno-00979D?logo=arduino&logoColor=white)](hardware/README.md)
+[![Simulink](https://img.shields.io/badge/Simulink-Connected%20IO-E16737?logo=mathworks&logoColor=white)](hardware/simulink/README.md)
+
 **Fuzzy-logic motor speed control where the membership functions are a learned
 decision model** — [Von](https://github.com/wfzyx/von), an open-source
 "System One" model (bidirectional ModernBERT, ~400M params, Apache 2.0), plays
@@ -125,6 +132,13 @@ tops out around 56 RPM at full duty; the reference is 40 RPM.
   ~40 ms/batch on CPU.
 - **Keep hard guardrails.** Out-of-distribution states return garbage grades;
   clamp duty and keep a hardware e-stop.
+
+## Acknowledgments
+
+Built on [Von](https://github.com/wfzyx/von), an open-source non-autoregressive
+"System One" decision model (bidirectional ModernBERT, ~400M params, Apache 2.0)
+by [@wfzyx](https://github.com/wfzyx). Model weights on Hugging Face:
+[wfzyx/von-1.0](https://huggingface.co/wfzyx/von-1.0).
 
 ## License
 
