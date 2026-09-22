@@ -1,0 +1,45 @@
+{
+  "plant": {
+    "a": 0.930044,
+    "b": 0.782633,
+    "ts": 0.05,
+    "comment": "G(z) = b*z^-1 / (1 - a*z^-1), volts -> RPM. 0.05 s equivalent of 0.1611/(z-0.9856) @ 0.01 s (ZOH)"
+  },
+  "volts_per_duty": 5,
+  "ref_rpm": 40,
+  "noise_sigma_rpm": 2,
+  "rpm_filter_tau": 0.1,
+  "pi": {
+    "kp": 0.019052870845695048,
+    "ki": 0.02668430167371949,
+    "comment": "1-DOF PID, UseKiTs off -> block applies I*Ts/(z-1). Rewrite via design_pid.m"
+  },
+  "von": {
+    "cadence_s": 0.1,
+    "db_rpm": 2,
+    "ki_leak": 0.001,
+    "err_fs": 36,
+    "consequents": [
+      0.25,
+      0.03,
+      0.002,
+      0.001,
+      0,
+      -0.01,
+      -0.04,
+      -0.15,
+      -0.2
+    ],
+    "antecedents": [
+      "Is the motor speed far below the target, less than roughly 70% of it?",
+      "Is the motor speed clearly below the target but not far below?",
+      "Is the motor speed slightly below the target?",
+      "Is the motor speed just barely below the target, within a few percent?",
+      "Is the motor speed approximately at the target?",
+      "Is the motor speed just barely above the target, within a few percent?",
+      "Is the motor speed slightly above the target?",
+      "Is the motor speed clearly above the target but not far above?",
+      "Is the motor speed far above the target, more than roughly 140% of it?"
+    ]
+  }
+}

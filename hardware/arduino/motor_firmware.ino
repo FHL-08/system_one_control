@@ -7,7 +7,7 @@
  *   <- host sends "S\n"          emergency stop (duty 0)
  *
  * Hardware (defaults, edit below):
- *   PWM_PIN  = 9   -> motor driver PWM/ENA input (e.g. L298N ENA, ESC signal)
+ *   PWM_PIN  = 5   -> motor driver PWM/ENA input (e.g. L298N ENA, ESC signal)
  *   ENC_A    = 2   -> encoder channel A (interrupt)
  *   ENC_B    = 3   -> encoder channel B (interrupt; optional but recommended)
  *   ENCODER_PPR    = pulses per revolution of your encoder
@@ -16,7 +16,7 @@
  * encoder, set SINGLE_CHANNEL_TACH to true and leave ENC_B unconnected.
  */
 
-const uint8_t PWM_PIN = 9;
+const uint8_t PWM_PIN = 5;
 const uint8_t ENC_A   = 2;
 const uint8_t ENC_B   = 3;
 const bool SINGLE_CHANNEL_TACH = false;

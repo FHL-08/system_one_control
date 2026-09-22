@@ -3,8 +3,8 @@
 **Fuzzy-logic motor speed control where the membership functions are a learned
 decision model** — [Von](https://github.com/wfzyx/von), an open-source
 "System One" model (bidirectional ModernBERT, ~400M params, Apache 2.0), plays
-the role of the fuzzification layer. The plant is a DC motor driven by an
-Arduino over PWM with encoder feedback.
+the role of the fuzzification layer. The plant is an LGM12-N20 12mm DC geared
+motor driven by an Arduino Uno over PWM with encoder feedback.
 
 ## Motivation
 
@@ -55,51 +55,49 @@ u \leftarrow \Pi_{[0,1]}\!\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]
 ## Repository layout
 
 ```
-arduino/motor_firmware.ino    PWM drive + encoder tachometer + serial protocol
-controller/fuzzy_controller.py  fuzzify → rule base → defuzzify → duty
-controller/motor_sim.py       first-order-lag plant model for hardware-free runs
-requirements.txt              Python deps (needs Python ≥ 3.12)
+shared/                   Von fuzzy controller used by both paths below
+  von_control.py            one control tick: fuzzify -> rule base -> duty
+  von_batch.py              evaluates all antecedents in one forward pass
+  controller_params.json    plant, PI and Von constants (single source of truth)
+simulation/               hardware-free runs — see simulation/README.md
+hardware/
+  arduino/                  standalone Uno firmware — see hardware/README.md
+  simulink/                 Connected IO models + MATLAB scripts — see
+                            hardware/simulink/README.md
+requirements.txt          Python deps (needs Python >= 3.12)
 ```
 
-## Quickstart
+## Environment setup
+
+One Python environment covers both the simulation and the Simulink hardware
+path (MATLAB calls it via `pyenv`):
 
 ```bash
 uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -r requirements.txt
-
-# simulated plant (DC gain ≈ 1140 RPM at full duty — keep targets below ~1000)
-.venv/bin/python controller/fuzzy_controller.py --simulate --target 800
-
-# real plant (flash arduino/motor_firmware.ino first)
-.venv/bin/python controller/fuzzy_controller.py --port /dev/ttyUSB0 --target 800
 ```
 
-First run downloads ~1.5 GB of weights from Hugging Face (set `HF_TOKEN` for
-higher rate limits). CPU inference is ~0.5–1 s per control tick.
+First Von call downloads ~1.5 GB of weights from Hugging Face (set `HF_TOKEN`
+for higher rate limits). CPU inference is ~0.5–1 s per control tick.
 
-## Hardware
+## What to run
 
-Defaults in `motor_firmware.ino` — edit to match your setup:
-
-| Arduino pin | Connects to |
-|-------------|-------------|
-| D9 (PWM)    | Driver PWM/enable (L298N `ENA`, ESC signal, MOSFET gate driver) |
-| D2 (INT0)   | Encoder channel A, or single-channel tach (set `SINGLE_CHANNEL_TACH`) |
-| D3 (INT1)   | Encoder channel B (quadrature only) |
-
-Serial protocol at 115200 baud: host sends `D<0-255>` (duty) or `S` (stop);
-board streams `RPM <float>` every 100 ms. Set `ENCODER_PPR` to your encoder.
+- **Simulation (no hardware):** see [simulation/README.md](simulation/README.md) —
+  `fuzzy_controller.py --simulate` for a quick demo, `von_vs_pid.py` for the
+  PI-vs-Von comparison.
+- **Hardware:** see [hardware/README.md](hardware/README.md) — either the
+  standalone Arduino firmware driven over serial, or the Simulink
+  Connected IO model in [hardware/simulink/](hardware/simulink/README.md).
 
 ## Technical notes
 
-**Simulated step response.** The simulator uses the identified discrete-time
-plant, duty $u \in [0,1]$ mapped onto the 0–5 V input:
+**Simulated step response.** `simulation/von_vs_pid.py` uses the identified
+discrete-time plant from `shared/controller_params.json`:
 
-$$G(z) = \frac{\Omega(z)}{V(z)} = \frac{172}{z - 0.2462}, \qquad T_s = 0.2\text{ s}$$
+$$G(z) = \frac{b\,z^{-1}}{1 - a\,z^{-1}}, \qquad T_s = 0.05\text{ s}$$
 
-i.e. $\omega[k+1] = 0.2462\,\omega[k] + 172\,v[k]$, with DC gain
-$\approx 228$ RPM/V ($\approx 1140$ RPM at 5 V). For an 800 RPM setpoint the
-loop settles in ~4 s and holds within roughly ±5% with a mild limit cycle.
+with duty $u \in [0,1]$ mapped onto the 0–5 V input
+(`volts = volts_per_duty * duty`).
 
 **Limitations:**
 
