@@ -7,6 +7,7 @@ __pycache__/
 slprj/
 *.slxc
 *.autosave
+*.asv
 sccprj/
 *.mex*
 
