@@ -11,8 +11,10 @@ Uno** over PWM, with quadrature encoder feedback.
 | D3  | Encoder channel B (INT1) | Encoder output B |
 | D5  | PWM output | Motor driver PWM/ENA input (L298N `ENA`, ESC signal, MOSFET gate driver) |
 
-Provide your own driver stage and supply. Set `ENCODER_PPR` in the firmware
-(or counts-per-rev on the Simulink Encoder block) to match your motor.
+Provide your own driver stage and supply. `ENCODER_PPR` defaults to 3576 —
+output-shaft counts per revolution for the LGM12-N20 encoder through its
+gearbox (same value `simulink/encoder_rpm.m` uses). The output shaft tops
+out around 56 RPM at full duty, so pick targets accordingly.
 
 ## Two ways to run
 
@@ -22,7 +24,7 @@ Provide your own driver stage and supply. Set `ENCODER_PPR` in the firmware
 2. From the repo root:
 
    ```bash
-   .venv/bin/python simulation/fuzzy_controller.py --port /dev/ttyUSB0 --target 800
+   .venv/bin/python simulation/fuzzy_controller.py --port /dev/ttyUSB0 --target 40
    ```
 
 Serial protocol at 115200 baud: host sends `D<0-255>` (duty) or `S` (stop);

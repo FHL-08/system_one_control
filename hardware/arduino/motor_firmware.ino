@@ -20,7 +20,7 @@ const uint8_t PWM_PIN = 5;
 const uint8_t ENC_A   = 2;
 const uint8_t ENC_B   = 3;
 const bool SINGLE_CHANNEL_TACH = false;
-const long ENCODER_PPR = 20;            // change to your encoder's PPR
+const long ENCODER_PPR = 3576;          // output-shaft counts/rev (encoder CPR x gear ratio x 4 edges)
 const unsigned long REPORT_MS = 100;    // RPM report / control sample rate
 
 volatile long encoder_ticks = 0;

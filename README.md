@@ -38,19 +38,23 @@ integrated onto the duty cycle:
 $$\mu_i = \text{Noul}\bigl(x,\ q_i\bigr), \qquad
 u \leftarrow \Pi_{[0,1]}\!\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
 
+The implementation adds an error-magnitude throttle (scales the delta by
+$|e|/e_{fs}$), a deadband with a small integral leak, and cadence
+normalization — all constants in `shared/controller_params.json`.
+
 ### Rule base
 
 | term            | antecedent (paraphrased)          | $c_i$  |
 |-----------------|-----------------------------------|--------|
-| far_under       | far below target ($< \sim 0.7\,\bar u$) | $+0.20$ |
-| under           | clearly below target              | $+0.10$ |
-| slightly_under  | slightly below target             | $+0.04$ |
-| near_under      | barely below target               | $+0.015$ |
+| far_under       | far below target ($< \sim 0.7\,\bar u$) | $+0.25$ |
+| under           | clearly below target              | $+0.03$ |
+| slightly_under  | slightly below target             | $+0.002$ |
+| near_under      | barely below target               | $+0.001$ |
 | on_target       | approximately at target           | $0$    |
-| near_over       | barely above target               | $-0.015$ |
+| near_over       | barely above target               | $-0.01$ |
 | slightly_over   | slightly above target             | $-0.04$ |
-| over            | clearly above target              | $-0.10$ |
-| far_over        | far above target ($> \sim 1.4\,\bar u$) | $-0.20$ |
+| over            | clearly above target              | $-0.15$ |
+| far_over        | far above target ($> \sim 1.4\,\bar u$) | $-0.2$ |
 
 ## Repository layout
 
@@ -94,10 +98,11 @@ for higher rate limits). CPU inference is ~0.5–1 s per control tick.
 **Simulated step response.** `simulation/von_vs_pid.py` uses the identified
 discrete-time plant from `shared/controller_params.json`:
 
-$$G(z) = \frac{b\,z^{-1}}{1 - a\,z^{-1}}, \qquad T_s = 0.05\text{ s}$$
+$$G(z) = \frac{0.7826\,z^{-1}}{1 - 0.9300\,z^{-1}}, \qquad T_s = 0.05\text{ s}$$
 
 with duty $u \in [0,1]$ mapped onto the 0–5 V input
-(`volts = volts_per_duty * duty`).
+(`volts = volts_per_duty * duty`). DC gain ≈ 11.2 RPM/V, so the output shaft
+tops out around 56 RPM at full duty; the reference is 40 RPM.
 
 **Limitations:**
 
