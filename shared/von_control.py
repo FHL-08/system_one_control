@@ -64,8 +64,9 @@ def tick(rpm, target, duty_prev, t):
              if den > 0 else 0.0)
 
     # error-magnitude throttle: near target the biased under-grades would
-    # otherwise keep pushing past the plant lag
-    delta *= min(1.0, abs(err) / v['err_fs'])
+    # otherwise keep pushing past the plant lag. Floored at
+    # throttle_floor so corrections do not vanish in the last few RPM.
+    delta *= max(v['throttle_floor'], min(1.0, abs(err) / v['err_fs']))
 
     # deadband: small integral leak inside +/-db_rpm
     if abs(err) <= v['db_rpm']:

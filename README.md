@@ -47,8 +47,9 @@ $$\mu_i = \text{Noul}\bigl(x,\ q_i\bigr), \qquad
 u \leftarrow \Pi_{[0,1]}\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
 
 The implementation adds an error-magnitude throttle (scales the delta by
-$|e|/e_{fs}$), a deadband with a small integral leak, and cadence
-normalization — all constants in `shared/controller_params.json`.
+$|e|/e_{fs}$, floored at `throttle_floor` so corrections do not vanish
+in the last few RPM of approach), a deadband with a small integral leak,
+and cadence normalization — all constants in `shared/controller_params.json`.
 
 ### Rule base
 

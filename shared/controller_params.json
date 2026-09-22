@@ -16,6 +16,7 @@
   },
   "von": {
     "cadence_s": 0.1,
+    "throttle_floor": 0.1,
     "db_rpm": 2,
     "ki_leak": 0.001,
     "err_fs": 36,
