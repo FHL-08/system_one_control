@@ -46,13 +46,24 @@ integrated onto the duty cycle:
 $$\mu_i = \text{Noul}\bigl(x,\ q_i\bigr), \qquad
 u \leftarrow \Pi_{[0,1]}\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
 
-The implementation adds an asymmetric error-magnitude throttle (scales the
-delta by $|e|/e_{fs}$ — floored at `throttle_floor` for pushes so
-corrections do not vanish in the last few RPM of approach, and at the
-higher `brake_floor` so braking keeps enough authority to arrest an
-overshoot), an EMA on the grades (`mu_ema`) so a single noisy tick cannot
-flip a saturated band, a deadband with a small integral leak, and cadence
-normalization — all constants in `shared/controller_params.json`.
+Four mechanisms sit on top of the bare rule base — all constants in
+`shared/controller_params.json`:
+
+- **Grade smoothing** (`mu_ema`): the grades $\mu_i$ are passed through an
+  exponential moving average across ticks. Grades are near-binary, so
+  without this a single noisy RPM reading can flip the dominant term for
+  one tick and jerk the duty.
+- **Error-magnitude throttle** (`err_fs`, `throttle_floor`, `brake_floor`):
+  the defuzzified increment $\Delta u$ is scaled by $\min(1, |e|/e_{fs})$.
+  Increasing duty uses a small floor (`throttle_floor`) so corrections
+  shrink near the setpoint but never vanish; decreasing duty uses a larger
+  floor (`brake_floor`) because braking needs authority even when the
+  overshoot is still small.
+- **Deadband** (`db_rpm`, `ki_leak`): for $|e| \le$ `db_rpm` the fuzzy
+  increment is replaced by the proportional leak $\Delta u = -k_i e$.
+- **Cadence normalization**: the consequents are duty-per-call at a 0.15 s
+  tick, so $\Delta u$ is scaled by `cadence_s`/0.15 to keep the effective
+  rate independent of the inference gate.
 
 The premise carries the signed percentage deviation directly
 ("measured=32 RPM (20% below the target)"), so the antecedent questions
