@@ -37,7 +37,7 @@ rather than tuned per-plant.
 ## Control law
 
 Each tick the controller serializes telemetry into text,
-$x = (\text{target},\ \text{rpm},\ \text{rpm/target},\ e,\ \dot e\ \text{sign})$,
+$x = (\text{target},\ \text{rpm},\ \text{% deviation},\ e,\ \dot e\ \text{sign})$,
 and evaluates all
 $N$ antecedents in a single model forward pass. Rule consequents are
 singletons $c_i$ (Sugeno order-0), defuzzified by weighted average and
@@ -46,24 +46,35 @@ integrated onto the duty cycle:
 $$\mu_i = \text{Noul}\bigl(x,\ q_i\bigr), \qquad
 u \leftarrow \Pi_{[0,1]}\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
 
-The implementation adds an error-magnitude throttle (scales the delta by
-$|e|/e_{fs}$, floored at `throttle_floor` so corrections do not vanish
-in the last few RPM of approach), a deadband with a small integral leak,
-and cadence normalization — all constants in `shared/controller_params.json`.
+The implementation adds an asymmetric error-magnitude throttle (scales the
+delta by $|e|/e_{fs}$ — floored at `throttle_floor` for pushes so
+corrections do not vanish in the last few RPM of approach, and at the
+higher `brake_floor` so braking keeps enough authority to arrest an
+overshoot), an EMA on the grades (`mu_ema`) so a single noisy tick cannot
+flip a saturated band, a deadband with a small integral leak, and cadence
+normalization — all constants in `shared/controller_params.json`.
+
+The premise carries the signed percentage deviation directly
+("measured=32 RPM (20% below the target)"), so the antecedent questions
+and the premise share units — Von is a verification model, not a
+calculator. Range antecedents are phrased "between X% and Y%", the
+wording under which the verification primitive respects both bounds.
+`simulation/membership_sweep.py` sweeps the premise across the band
+edges to audit grade coherence.
 
 ### Rule base
 
 | term            | antecedent                        | $c_i$  |
 |-----------------|-----------------------------------|--------|
-| far_under       | speed $< 70\%$ of target          | $+0.25$ |
-| under           | below target by 10–30%            | $+0.15$ |
-| slightly_under  | below target by 3–10%             | $+0.05$ |
-| near_under      | below target by $< 3\%$           | $+0.001$ |
+| far_under       | more than 30% below target        | $+0.25$ |
+| under           | between 10% and 30% below         | $+0.10$ |
+| slightly_under  | between 3% and 10% below          | $+0.03$ |
+| near_under      | below target by < 3%              | $+0.001$ |
 | on_target       | at target                         | $0$    |
-| near_over       | above target by $< 3\%$           | $-0.01$ |
-| slightly_over   | above target by 3–10%             | $-0.04$ |
-| over            | above target by 10–40%            | $-0.15$ |
-| far_over        | speed $> 140\%$ of target         | $-0.2$ |
+| near_over       | above target by < 3%              | $-0.10$ |
+| slightly_over   | between 3% and 10% above          | $-0.20$ |
+| over            | between 10% and 40% above         | $-0.30$ |
+| far_over        | more than 40% above target        | $-0.25$ |
 
 ## Repository layout
 

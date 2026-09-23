@@ -19,6 +19,7 @@ _noul = None
 _e_prev = 0.0
 _t_last = None
 _mu_last = None
+_mu_ema = None
 
 
 def _ensure_ready():
@@ -32,10 +33,11 @@ def _ensure_ready():
 
 def reset():
     """Clear inter-call state (error trend, gate). Call between runs."""
-    global _e_prev, _t_last, _mu_last
+    global _e_prev, _t_last, _mu_last, _mu_ema
     _e_prev = 0.0
     _t_last = None
     _mu_last = None
+    _mu_ema = None
 
 
 def tick(rpm, target, duty_prev, t):
@@ -43,7 +45,7 @@ def tick(rpm, target, duty_prev, t):
     params.von.cadence_s — returns (duty, mu), holding both between
     inference calls."""
     _ensure_ready()
-    global _e_prev, _t_last, _mu_last
+    global _e_prev, _t_last, _mu_last, _mu_ema
     v = PARAMS['von']
 
     # t < _t_last means a new run restarted the clock -> re-arm the gate
@@ -54,11 +56,22 @@ def tick(rpm, target, duty_prev, t):
     err = rpm - target
     trend = 'increasing' if err > _e_prev else 'decreasing'
     _e_prev = err
+    pct = 100 * err / target
+    rel = ('at the target' if abs(pct) < 0.5 else
+           f'{abs(pct):.0f}% below the target' if pct < 0 else
+           f'{pct:.0f}% above the target')
     state = (f'DC motor speed telemetry: target={target:.0f} RPM, '
-             f'measured={rpm:.0f} RPM ({100 * rpm / target:.0f}% of target), '
+             f'measured={rpm:.0f} RPM ({rel}), '
              f'error={err:+.0f} RPM, error is {trend}.')
 
     mu = [float(g) for g in _noul(state, v['antecedents'])]
+    # EMA on grades: a single noisy tick can't flip a saturated band
+    beta = v.get('mu_ema', 0.0)
+    if _mu_ema is None:
+        _mu_ema = mu
+    else:
+        _mu_ema = [beta * p + (1 - beta) * m for p, m in zip(_mu_ema, mu)]
+    mu = _mu_ema
     den = sum(mu)
     delta = (sum(m * c for m, c in zip(mu, v['consequents'])) / den
              if den > 0 else 0.0)
@@ -66,7 +79,10 @@ def tick(rpm, target, duty_prev, t):
     # error-magnitude throttle: near target the biased under-grades would
     # otherwise keep pushing past the plant lag. Floored at
     # throttle_floor so corrections do not vanish in the last few RPM.
-    delta *= max(v['throttle_floor'], min(1.0, abs(err) / v['err_fs']))
+    # Braking gets its own (higher) floor: proportional, but with enough
+    # authority at small overshoot to actually arrest the climb.
+    floor = v['throttle_floor'] if delta > 0 else v['brake_floor']
+    delta *= max(floor, min(1.0, abs(err) / v['err_fs']))
 
     # deadband: small integral leak inside +/-db_rpm
     if abs(err) <= v['db_rpm']:

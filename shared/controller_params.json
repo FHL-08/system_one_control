@@ -17,30 +17,32 @@
   "von": {
     "cadence_s": 0.1,
     "throttle_floor": 0.1,
+    "brake_floor": 0.4,
+    "mu_ema": 0.4,
     "db_rpm": 2,
     "ki_leak": 0.001,
     "err_fs": 36,
     "consequents": [
       0.25,
-      0.15,
-      0.05,
+      0.1,
+      0.03,
       0.001,
       0,
-      -0.01,
-      -0.04,
-      -0.15,
-      -0.2
+      -0.1,
+      -0.2,
+      -0.3,
+      -0.25
     ],
     "antecedents": [
-      "Is the motor speed less than 70% of the target?",
-      "Is the motor speed below the target by 10% to 30%?",
-      "Is the motor speed below the target by 3% to 10%?",
+      "Is the motor speed more than 30% below the target?",
+      "Is the motor speed between 10% and 30% below the target?",
+      "Is the motor speed between 3% and 10% below the target?",
       "Is the motor speed below the target by less than 3%?",
       "Is the motor speed at the target?",
       "Is the motor speed above the target by less than 3%?",
-      "Is the motor speed above the target by 3% to 10%?",
-      "Is the motor speed above the target by 10% to 40%?",
-      "Is the motor speed more than 140% of the target?"
+      "Is the motor speed between 3% and 10% above the target?",
+      "Is the motor speed between 10% and 40% above the target?",
+      "Is the motor speed more than 40% above the target?"
     ]
   }
 }
