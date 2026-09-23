@@ -1,4 +1,4 @@
-"""Batched Noul evaluation — one forward pass for all membership questions.
+"""Batched Noul evaluation: one forward pass for all membership questions.
 
 Replicates the question-form path of BertaBackend.evaluate_noul: each question
 "Q?" is scored as softmax(entail_logit("Q? Yes."), entail_logit("Q? No."))[0],

@@ -9,7 +9,7 @@ serial; `von_fuzzy.m` calls `../../shared/von_control.py` through `pyenv`.
 - MATLAB + Simulink
 - Simulink Support Package for Arduino Hardware (Connected IO uploads the
   IO server to the board automatically on first run)
-- The project Python venv — set it up from the repo root first; `setup.m`
+- The project Python venv: set it up from the repo root first; `setup.m`
   points `pyenv` at `.venv/bin/python`
 
 ## Files
@@ -17,7 +17,7 @@ serial; `von_fuzzy.m` calls `../../shared/von_control.py` through `pyenv`.
 | File | Role |
 |------|------|
 | `generate_identification_data.slx` | Applies the input sequence and logs `t`, `u`, `y` for identification |
-| `motor_data.mat` | Captured identification dataset (`t`, `u`, `y`) — lets you run the ID script without hardware |
+| `motor_data.mat` | Captured identification dataset (`t`, `u`, `y`); lets you run the ID script without hardware |
 | `optimal_motor_identification.m` | Fits a first-order IIR model to `t`, `u`, `y` (expects them in the workspace) |
 | `design_pid.m` | Pole-placement PI design; writes gains to `shared/controller_params.json` |
 | `motor_von_hw.slx` | Closed-loop model; CtrlSelect switches Von (in1) vs PI (in2) |

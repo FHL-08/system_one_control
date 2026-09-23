@@ -1,5 +1,5 @@
 %OPTIMAL_MOTOR_IDENTIFICATION Fit a first-order IIR model to measured data.
-%   Expects t, u, y in the workspace — logged by
+%   Expects t, u, y in the workspace, logged by
 %   generate_identification_data.slx or loaded from motor_data.mat.
 
 clc;

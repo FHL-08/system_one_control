@@ -1,11 +1,11 @@
-"""Von fuzzy controller — single source of truth for the control law.
+"""Von fuzzy controller: single source of truth for the control law.
 
 Constants live in controller_params.json (shared with the Simulink model
 via load_params.m). This module is called from:
   - von_fuzzy.m      (MATLAB shim for motor_von_hw.slx, host-side)
   - von_vs_pid.py    (pure-Python offline comparison)
 
-tick(rpm, target, duty_prev) -> (duty, mu): one controller step —
+tick(rpm, target, duty_prev) -> (duty, mu): one controller step:
 Noul posteriors as membership grades, Sugeno-0 weighted average,
 error-magnitude throttle, deadband+leak, duty integrated and clamped
 to [0,1].
@@ -42,7 +42,7 @@ def reset():
 
 def tick(rpm, target, duty_prev, t):
     """One controller step at the model tick; inference gated by
-    params.von.cadence_s — returns (duty, mu), holding both between
+    params.von.cadence_s. Returns (duty, mu), holding both between
     inference calls."""
     _ensure_ready()
     global _e_prev, _t_last, _mu_last, _mu_ema

@@ -9,8 +9,8 @@ Hardware-free runs of the control loop. Two entry points:
 | `membership_sweep.py` | Sweeps measured RPM across the band edges and audits membership coherence for a premise/antecedent wording. Prints per-term band separation; writes `membership_sweep.png`, `membership_sweep.npz`. |
 | `tune_consequents.py` | Closed-loop grid search over consequents / throttle floors / grade EMA using the `von_vs_pid` harness. |
 
-All four use `../shared/von_control.py` — the same code the Simulink
-hardware model calls — with constants from `../shared/controller_params.json`.
+All four use `../shared/von_control.py` (the same code the Simulink
+hardware model calls), with constants from `../shared/controller_params.json`.
 
 ## Setup
 

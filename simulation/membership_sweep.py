@@ -80,7 +80,7 @@ def state_pct(rpm, target, trend='steady'):
             f'error={err:+.0f} RPM, error is {trend}.')
 
 
-# deviation-domain antecedents — the open-ended bands use single-sided
+# deviation-domain antecedents; the open-ended bands use single-sided
 # threshold wording ("more than 30% below"), same units as the pct premise
 ANTECEDENTS_PCT = [
     'Is the motor speed more than 30% below the target?',

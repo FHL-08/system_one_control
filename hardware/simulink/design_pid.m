@@ -77,7 +77,7 @@ pid.Cz = tf([pid.Kp, -pid.Kp+pid.I*Ts], [1 -1], Ts);
 pid.T_cl = feedback(pid.Cz*Gd, 1);
 
 % write gains back to the shared params file (strip derived fields added
-% by load_params — they are recomputed on every load)
+% by load_params; they are recomputed on every load)
 params.pi.kp = pid.Kp;
 params.pi.ki = pid.I;
 params = rmfield(params, {'rpm_filter_num', 'rpm_filter_den'});

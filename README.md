@@ -8,7 +8,7 @@
 [![Simulink](https://img.shields.io/badge/Simulink-Connected%20IO-E16737?logo=mathworks&logoColor=white)](hardware/simulink/README.md)
 
 **Fuzzy-logic motor speed control where the membership functions are a learned
-decision model** — [Von](https://github.com/wfzyx/von), an open-source
+decision model.** [Von](https://github.com/wfzyx/von), an open-source
 "System One" model (bidirectional ModernBERT, ~400M params, Apache 2.0), plays
 the role of the fuzzification layer. The plant is an LGM12-N20 12mm DC geared
 motor driven by an Arduino Uno over PWM with encoder feedback.
@@ -28,7 +28,7 @@ $$\mu_i(x) = P\bigl(\text{term}_i \text{ holds} \mid x\bigr) \in [0,1]$$
 
 where each term is defined in natural language ("is the speed slightly above
 the target?"). Nothing in the fuzzy inference chain requires $\mu$ to be
-analytic — any state-graded map in $[0,1]$ is a valid membership function —
+analytic (any state-graded map in $[0,1]$ is a valid membership function),
 so the swap is mathematically sound and gives language-programmable,
 calibrated grades for free. In spirit this is a zero-shot ANFIS: the
 membership shapes were learned during the model's entailment-style training
@@ -46,8 +46,8 @@ integrated onto the duty cycle:
 $$\mu_i = \text{Noul}\bigl(x,\ q_i\bigr), \qquad
 u \leftarrow \Pi_{[0,1]}\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
 
-Four mechanisms sit on top of the bare rule base — all constants in
-`shared/controller_params.json`:
+Four mechanisms sit on top of the bare rule base (all constants in
+`shared/controller_params.json`):
 
 - **Grade smoothing** (`mu_ema`): the grades $\mu_i$ are passed through an
   exponential moving average across ticks. Grades are near-binary, so
@@ -67,7 +67,7 @@ Four mechanisms sit on top of the bare rule base — all constants in
 
 The premise carries the signed percentage deviation directly
 ("measured=32 RPM (20% below the target)"), so the antecedent questions
-and the premise share units — Von is a verification model, not a
+and the premise share units: Von is a verification model, not a
 calculator. Range antecedents are phrased "between X% and Y%", the
 wording under which the verification primitive respects both bounds.
 `simulation/membership_sweep.py` sweeps the premise across the band
@@ -94,11 +94,11 @@ shared/                   Von fuzzy controller used by both paths below
   von_control.py            one control tick: fuzzify -> rule base -> duty
   von_batch.py              evaluates all antecedents in one forward pass
   controller_params.json    plant, PI and Von constants (single source of truth)
-simulation/               hardware-free runs — see simulation/README.md
+simulation/               hardware-free runs (see simulation/README.md)
 hardware/
-  arduino/                  standalone Uno firmware — see hardware/README.md
-  simulink/                 Connected IO models + MATLAB scripts — see
-                            hardware/simulink/README.md
+  arduino/                  standalone Uno firmware (see hardware/README.md)
+  simulink/                 Connected IO models + MATLAB scripts
+                            (see hardware/simulink/README.md)
 requirements.txt          Python deps (needs Python >= 3.12)
 ```
 
@@ -114,14 +114,14 @@ uv pip install --python .venv/bin/python -r requirements.txt
 
 First Von call downloads ~1.5 GB of weights from Hugging Face (set `HF_TOKEN`
 for higher rate limits). Inference is ~40 ms per control tick on a desktop
-CPU — all 9 antecedents in a single forward pass.
+CPU, all 9 antecedents in a single forward pass.
 
 ## What to run
 
-- **Simulation (no hardware):** see [simulation/README.md](simulation/README.md) —
+- **Simulation (no hardware):** see [simulation/README.md](simulation/README.md):
   `fuzzy_controller.py --simulate` for a quick demo, `von_vs_pid.py` for the
   PI-vs-Von comparison.
-- **Hardware:** see [hardware/README.md](hardware/README.md) — either the
+- **Hardware:** see [hardware/README.md](hardware/README.md): either the
   standalone Arduino firmware driven over serial, or the Simulink
   Connected IO model in [hardware/simulink/](hardware/simulink/README.md).
 
@@ -133,8 +133,8 @@ less duty jitter.
 
 ![Von vs PI on hardware](hardware/simulink/hw_compare.png)
 
-Von membership grades during the Von run — `on_target` dominates once
-the speed parks at setpoint:
+Von membership grades during the Von run (`on_target` dominates once
+the speed parks at setpoint):
 
 ![Von membership grades](hardware/simulink/hw_grades.png)
 
@@ -145,7 +145,7 @@ discrete-time plant from `shared/controller_params.json`:
 
 $$G(z) = \frac{0.7826 z^{-1}}{1 - 0.9300 z^{-1}}, \qquad T_s = 0.05\text{ s}$$
 
-with duty $u \in [0,1]$ mapped onto the 0–5 V input
+with duty $u \in [0,1]$ mapped onto the 0-5 V input
 (`volts = volts_per_duty * duty`). DC gain ≈ 11.2 RPM/V, so the output shaft
 tops out around 56 RPM at full duty; the reference is 40 RPM.
 
@@ -160,8 +160,8 @@ tops out around 56 RPM at full duty; the reference is 40 RPM.
   fuzzy one; the fine "near"/"slightly" terms do the steady-state work.
 - **Asymmetry is real and exploitable.** "Under" terms fire more readily than
   mirrored "over" terms (lexical entailment bias from NLI-style training).
-  The result is an asymmetric gain surface — brakes harder than it
-  accelerates — which is *desirable* when overshoot/overcurrent is the
+  The result is an asymmetric gain surface (brakes harder than it
+  accelerates), which is *desirable* when overshoot/overcurrent is the
   dangerous direction, and can be engineered deliberately via wording.
 - **Rate limits.** Control updates are gated by `von.cadence_s`
   (0.1 s → 10 Hz) in `shared/controller_params.json`; inference itself is
@@ -176,7 +176,7 @@ Built on [Von](https://github.com/wfzyx/von), an open-source non-autoregressive
 by [@wfzyx](https://github.com/wfzyx). Model weights on Hugging Face:
 [wfzyx/von-1.0](https://huggingface.co/wfzyx/von-1.0).
 
-Hardware built on the [ACE-Lab](https://www.ace-lab.co.uk/) rigs —
+Hardware built on the [ACE-Lab](https://www.ace-lab.co.uk/) rigs:
 ACE-Lab (Base + Sense) for the microcontroller and measurement side, with
 ACE-Lab (Actuate) providing the LGM12-N20 geared motor and driver.
 

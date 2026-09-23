@@ -1,6 +1,6 @@
 """Von-fuzzy speed controller over a simulated or serial plant.
 
-Runs the shared controller (../shared/von_control.py — the same code the
+Runs the shared controller (../shared/von_control.py, the same code the
 Simulink hardware model calls) against:
 
   --simulate   SimMotor, the identified discrete-time plant (motor_sim.py)

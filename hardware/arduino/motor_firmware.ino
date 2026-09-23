@@ -1,5 +1,5 @@
 /*
- * motor_firmware.ino — Arduino firmware for the Von fuzzy speed-controller demo.
+ * motor_firmware.ino: Arduino firmware for the Von fuzzy speed-controller demo.
  *
  * Protocol (115200 baud):
  *   <- host sends "D<0-255>\n"   set PWM duty (motor drive pin)
