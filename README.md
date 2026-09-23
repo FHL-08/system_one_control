@@ -37,7 +37,7 @@ rather than tuned per-plant.
 ## Control law
 
 Each tick the controller serializes telemetry into text,
-$x = (\text{target},\ \text{rpm},\ \text{% deviation},\ e,\ \text{sign}(\dot e))$,
+$x = (\text{target},\ \text{rpm},\ \text{pct deviation},\ e,\ \text{sign}(\dot e))$,
 and evaluates all
 $N$ antecedents in a single model forward pass. Rule consequents are
 singletons $c_i$ (Sugeno order-0), defuzzified by weighted average and
