@@ -24,7 +24,7 @@ Conventionally $\mu_i$ are hand-shaped triangles, trapezoids, or Gaussians.
 This project replaces them with Von's binary-verification primitive ("Noul"),
 which returns a calibrated posterior
 
-$$\mu_i(x) = P\bigl(\text{term}_i \text{ holds} \,\big|\, x\bigr) \in [0,1]$$
+$$\mu_i(x) = P\bigl(\text{term}_i \text{ holds} \mid x\bigr) \in [0,1]$$
 
 where each term is defined in natural language ("is the speed slightly above
 the target?"). Nothing in the fuzzy inference chain requires $\mu$ to be
@@ -37,7 +37,7 @@ rather than tuned per-plant.
 ## Control law
 
 Each tick the controller serializes telemetry into text,
-$x = (\text{target},\ \text{rpm},\ \text{% deviation},\ e,\ \dot e\ \text{sign})$,
+$x = (\text{target},\ \text{rpm},\ \text{% deviation},\ e,\ \text{sign}(\dot e))$,
 and evaluates all
 $N$ antecedents in a single model forward pass. Rule consequents are
 singletons $c_i$ (Sugeno order-0), defuzzified by weighted average and
@@ -132,7 +132,7 @@ the speed parks at setpoint:
 **Simulated step response.** `simulation/von_vs_pid.py` uses the identified
 discrete-time plant from `shared/controller_params.json`:
 
-$$G(z) = \frac{0.7826\,z^{-1}}{1 - 0.9300\,z^{-1}}, \qquad T_s = 0.05\text{ s}$$
+$$G(z) = \frac{0.7826 z^{-1}}{1 - 0.9300 z^{-1}}, \qquad T_s = 0.05\text{ s}$$
 
 with duty $u \in [0,1]$ mapped onto the 0–5 V input
 (`volts = volts_per_duty * duty`). DC gain ≈ 11.2 RPM/V, so the output shaft
