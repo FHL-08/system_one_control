@@ -1,15 +1,15 @@
 """Membership-function sweep: audits how coherent Von's grade structure
-is for a given premise/antecedent wording.
+is for a given state text/antecedent wording.
 
 Holds the antecedent questions fixed per variant; varies how the
-measured speed is serialized in the premise:
+measured speed is serialized in the state text:
 
   'ratio'  measured=32 RPM (80% of target)
   'pct'    measured=32 RPM (20% below the target)
 
 and two phrasings of the range antecedents ("below by 10% to 30%" vs
 "between 10% and 30% below"). For each rpm in the sweep each variant's
-premise is evaluated with its antecedents in one batch. Reports, per
+state text is evaluated with its antecedents in one batch. Reports, per
 term, the separation between mean in-band and out-of-band grades, plus
 argmax-band accuracy. Writes membership_sweep.png.
 
@@ -25,7 +25,7 @@ import von_control
 
 P = von_control.PARAMS
 TARGET = P['ref_rpm']
-# ratio-domain antecedents, paired with the 'N% of target' premise
+# ratio-domain antecedents, paired with the 'N% of target' state text
 ANTECEDENTS = [
     'Is the motor speed less than 70% of the target?',
     'Is the motor speed below the target by 10% to 30%?',
@@ -61,7 +61,7 @@ def band_idx(pct):
 
 
 def state_ratio(rpm, target, trend='steady'):
-    """Ratio-domain premise."""
+    """Ratio-domain state text."""
     err = rpm - target
     return (f'DC motor speed telemetry: target={target:.0f} RPM, '
             f'measured={rpm:.0f} RPM ({100 * rpm / target:.0f}% of target), '
@@ -69,7 +69,7 @@ def state_ratio(rpm, target, trend='steady'):
 
 
 def state_pct(rpm, target, trend='steady'):
-    """Deviation-domain premise (matches von_control.tick)."""
+    """Deviation-domain state text (matches von_control.tick)."""
     err = rpm - target
     pct = 100 * err / target
     rel = ('at the target' if abs(pct) < 0.5 else
@@ -81,7 +81,7 @@ def state_pct(rpm, target, trend='steady'):
 
 
 # deviation-domain antecedents; the open-ended bands use single-sided
-# threshold wording ("more than 30% below"), same units as the pct premise
+# threshold wording ("more than 30% below"), same units as the pct state text
 ANTECEDENTS_PCT = [
     'Is the motor speed more than 30% below the target?',
     'Is the motor speed below the target by 10% to 30%?',
@@ -135,19 +135,19 @@ def main():
     rpms = np.arange(0, 61, 0.5)
     pcts = 100 * (rpms - TARGET) / TARGET
 
-    print('sweeping ratio premise + ratio antecedents...')
+    print('sweeping ratio state text + ratio antecedents...')
     mu_ratio = sweep(state_ratio, rpms)
-    print('sweeping pct premise + ratio antecedents...')
+    print('sweeping pct state text + ratio antecedents...')
     mu_pct = sweep(state_pct, rpms)
-    print('sweeping pct premise + threshold antecedents...')
+    print('sweeping pct state text + threshold antecedents...')
     mu_pctq = sweep(state_pct, rpms, ANTECEDENTS_PCT)
-    print('sweeping pct premise + between antecedents...')
+    print('sweeping pct state text + between antecedents...')
     mu_bet = sweep(state_pct, rpms, ANTECEDENTS_BETWEEN)
 
-    report('ratio premise + ratio antecedents', mu_ratio, pcts)
-    report('pct premise + ratio antecedents', mu_pct, pcts)
-    report('pct premise + threshold antecedents', mu_pctq, pcts)
-    report('pct premise + between antecedents', mu_bet, pcts)
+    report('ratio state text + ratio antecedents', mu_ratio, pcts)
+    report('pct state text + ratio antecedents', mu_pct, pcts)
+    report('pct state text + threshold antecedents', mu_pctq, pcts)
+    report('pct state text + between antecedents', mu_bet, pcts)
 
     import matplotlib
     matplotlib.use('Agg')
@@ -156,10 +156,10 @@ def main():
     band_edges = [-30, -10, -3, 0, 3, 10, 40]
     for ax, mu, title in zip(
             axes, [mu_ratio, mu_pct, mu_pctq, mu_bet],
-            ['ratio premise "80% of target" + ratio antecedents',
-             'pct premise "20% below target" + ratio antecedents',
-             'pct premise + threshold antecedents ("more than 30% below")',
-             'pct premise + between antecedents ("between 10% and 30%")']):
+            ['ratio state text "80% of target" + ratio antecedents',
+             'pct state text "20% below target" + ratio antecedents',
+             'pct state text + threshold antecedents ("more than 30% below")',
+             'pct state text + between antecedents ("between 10% and 30%")']):
         for i, term in enumerate(TERMS):
             ax.plot(pcts, mu[:, i], label=term, lw=1.2)
         for e in band_edges:

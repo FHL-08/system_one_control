@@ -8,10 +8,10 @@
 [![Simulink](https://img.shields.io/badge/Simulink-Connected%20IO-E16737?logo=mathworks&logoColor=white)](hardware/simulink/README.md)
 
 **Fuzzy-logic motor speed control where the membership functions are a learned
-decision model.** [Von](https://github.com/wfzyx/von), an open-source
-"System One" model (bidirectional ModernBERT, ~400M params, Apache 2.0), plays
-the role of the fuzzification layer. The plant is an LGM12-N20 12mm DC geared
-motor driven by an Arduino Uno over PWM with encoder feedback.
+decision model.** [Von](https://github.com/wfzyx/von), an open-source model
+(~400M params, Apache 2.0) that answers yes/no questions with a probability,
+plays the role of the fuzzification layer. The plant is an LGM12-N20 12mm DC
+geared motor driven by an Arduino Uno over PWM with encoder feedback.
 
 ## Motivation
 
@@ -19,20 +19,18 @@ A fuzzy controller needs a fuzzification map
 
 $$\mu_i : \mathcal{X} \to [0,1]$$
 
-assigning each plant state $x$ a degree of membership in linguistic term $i$.
+assigning each plant state $x$ a degree of membership in term $i$.
 Conventionally $\mu_i$ are hand-shaped triangles, trapezoids, or Gaussians.
-This project replaces them with Von's binary-verification primitive ("Noul"),
-which returns a calibrated posterior
+This project replaces them with Von's yes/no verification primitive
+("Noul"), which returns a probability
 
 $$\mu_i(x) = P\bigl(\text{term}_i \text{ holds} \mid x\bigr) \in [0,1]$$
 
 where each term is defined in natural language ("is the speed slightly above
 the target?"). Nothing in the fuzzy inference chain requires $\mu$ to be
-analytic (any state-graded map in $[0,1]$ is a valid membership function),
-so the swap is mathematically sound and gives language-programmable,
-calibrated grades for free. In spirit this is a zero-shot ANFIS: the
-membership shapes were learned during the model's entailment-style training
-rather than tuned per-plant.
+analytic (any map into $[0,1]$ is a valid membership function), so the swap
+is sound: the membership shapes come from Von's training and are programmed
+in words, not tuned per-plant.
 
 ## Control law
 
@@ -40,8 +38,8 @@ Each tick the controller serializes telemetry into text,
 $x = (\text{target},\ \text{rpm},\ \text{pct deviation},\ e,\ \text{sign}(\dot e))$,
 and evaluates all
 $N$ antecedents in a single model forward pass. Rule consequents are
-singletons $c_i$ (Sugeno order-0), defuzzified by weighted average and
-integrated onto the duty cycle:
+constants $c_i$ (a Sugeno order-0 rule base), combined by weighted average
+and integrated onto the duty cycle:
 
 $$\mu_i = \text{Noul}\bigl(x,\ q_i\bigr), \qquad
 u \leftarrow \Pi_{[0,1]}\left[u + \frac{\sum_i \mu_i c_i}{\sum_i \mu_i}\right]$$
@@ -65,13 +63,13 @@ Four mechanisms sit on top of the bare rule base (all constants in
   tick, so $\Delta u$ is scaled by `cadence_s`/0.15 to keep the effective
   rate independent of the inference gate.
 
-The premise carries the signed percentage deviation directly
+The state text carries the signed percentage deviation directly
 ("measured=32 RPM (20% below the target)"), so the antecedent questions
-and the premise share units: Von is a verification model, not a
+and the state share units: Von is a verification model, not a
 calculator. Range antecedents are phrased "between X% and Y%", the
 wording under which the verification primitive respects both bounds.
-`simulation/membership_sweep.py` sweeps the premise across the band
-edges to audit grade coherence.
+`simulation/membership_sweep.py` sweeps the measured speed across the
+band edges to audit grade coherence.
 
 ### Rule base
 
@@ -113,8 +111,8 @@ uv pip install --python .venv/bin/python -r requirements.txt
 ```
 
 First Von call downloads ~1.5 GB of weights from Hugging Face (set `HF_TOKEN`
-for higher rate limits). Inference is ~40 ms per control tick on a desktop
-CPU, all 9 antecedents in a single forward pass.
+for higher rate limits). Each model call takes ~40 ms on a desktop CPU,
+all 9 antecedents in a single forward pass.
 
 ## What to run
 
@@ -152,27 +150,28 @@ tops out around 56 RPM at full duty; the reference is 40 RPM.
 **Limitations:**
 
 - **The membership map is not analytic.** Grades are a learned lookup over
-  serialized text, so there are no continuity/monotonicity guarantees and no
-  classical (Lyapunov/describing-function) stability proof. It is an empirical
+  text, so there are no continuity guarantees and no classical
+  (Lyapunov/describing-function) stability proof. It is an empirical
   controller.
-- **Grades are crisp-ish.** Calibrated probabilities cluster near 0/1, so the
-  effective surface is closer to a coarse switching surface than a smooth
-  fuzzy one; the fine "near"/"slightly" terms do the steady-state work.
+- **Grades are crisp-ish.** The probabilities cluster near 0 or 1, so the
+  result behaves more like a coarse multi-level switch than a smooth fuzzy
+  blend; the fine "near"/"slightly" terms do the steady-state work.
 - **Asymmetry is real and exploitable.** "Under" terms fire more readily than
-  mirrored "over" terms (lexical entailment bias from NLI-style training).
-  The result is an asymmetric gain surface (brakes harder than it
-  accelerates), which is *desirable* when overshoot/overcurrent is the
-  dangerous direction, and can be engineered deliberately via wording.
-- **Rate limits.** Control updates are gated by `von.cadence_s`
-  (0.1 s → 10 Hz) in `shared/controller_params.json`; inference itself is
-  ~40 ms/batch on CPU.
-- **Keep hard guardrails.** Out-of-distribution states return garbage grades;
-  clamp duty and keep a hardware e-stop.
+  mirrored "over" terms (a bias from the model's training). The result is an
+  asymmetric response (it brakes harder than it accelerates), which is
+  *desirable* when overshoot/overcurrent is the dangerous direction, and can
+  be engineered deliberately via wording.
+- **Rate limits.** Control updates are limited by `von.cadence_s`
+  (0.1 s → 10 Hz) in `shared/controller_params.json`; each model call takes
+  ~40 ms on CPU.
+- **Keep hard guardrails.** Telemetry that looks nothing like normal
+  operating text returns meaningless grades; clamp duty and keep a
+  hardware e-stop.
 
 ## Acknowledgments
 
-Built on [Von](https://github.com/wfzyx/von), an open-source non-autoregressive
-"System One" decision model (bidirectional ModernBERT, ~400M params, Apache 2.0)
+Built on [Von](https://github.com/wfzyx/von), an open-source "System One"
+decision model (~400M params, Apache 2.0)
 by [@wfzyx](https://github.com/wfzyx). Model weights on Hugging Face:
 [wfzyx/von-1.0](https://huggingface.co/wfzyx/von-1.0).
 

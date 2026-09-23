@@ -6,7 +6,7 @@ via load_params.m). This module is called from:
   - von_vs_pid.py    (pure-Python offline comparison)
 
 tick(rpm, target, duty_prev) -> (duty, mu): one controller step:
-Noul posteriors as membership grades, Sugeno-0 weighted average,
+Noul probabilities as membership grades, Sugeno-0 weighted average,
 error-magnitude throttle, deadband+leak, duty integrated and clamped
 to [0,1].
 """

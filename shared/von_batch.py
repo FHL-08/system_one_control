@@ -2,7 +2,7 @@
 
 Replicates the question-form path of BertaBackend.evaluate_noul: each question
 "Q?" is scored as softmax(entail_logit("Q? Yes."), entail_logit("Q? No."))[0],
-but all questions share the premise and run as a single batch.
+but all questions share the state text and run as a single batch.
 """
 import torch
 from von.engine import VonEngine
